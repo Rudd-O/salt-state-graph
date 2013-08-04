@@ -17,9 +17,14 @@ requires are blue; watches are red.
 
 Installation
 ============
+System requirements:
+
+* dot
+
+Python requirements:
 
 * pydot
-* dot
+* PyYAML
 
 dot
 ---
