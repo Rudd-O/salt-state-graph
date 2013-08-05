@@ -61,10 +61,14 @@ def find_edges(states, relname):
     Use find() to recursively find objects at keys matching
     relname, yielding a node name for every result.
     """
-    deps = find(states, relname)
-    for dep in deps:
-        for dep_type, dep_name in dep.iteritems():
-            yield make_node_name(dep_type, dep_name)
+    try:
+        deps = find(states, relname)
+        for dep in deps:
+            for dep_type, dep_name in dep.iteritems():
+                yield make_node_name(dep_type, dep_name)
+    except AttributeError as e:
+        sys.stderr.write("Bad state: {0}\n".format(str(states)))
+        raise e
 
 
 def main(input):
@@ -84,8 +88,8 @@ def main(input):
 
         if top_key == '__extend__':
             # TODO - merge these into the main states and remove them
-            #sys.stderr.write(
-            #        "Removing __extend__ states:\n{0}\n".format(str(props)))
+            sys.stderr.write(
+                    "Removing __extend__ states:\n{0}\n".format(str(props)))
             continue
 
         for top_key_type, states in props.iteritems():
