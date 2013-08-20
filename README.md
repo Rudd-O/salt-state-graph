@@ -66,8 +66,8 @@ Usage
 Example:
 
 ```bash
-# Run a show_highstate for a single minion and clean up the output
-$ salt-call state.show_highstate | sed -r "s/    ----------//g" > ~/highstate
+# Run a show_highstate for a single minion and get the output as YAML
+$ salt-call state.show_highstate --out yaml > ~/highstate
 
 # Run salt-state-graph with the recorded highstate as stdin
 $ python salt-state-graph.py < ~/highstate > ~/highstate.dot
