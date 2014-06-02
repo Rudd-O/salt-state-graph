@@ -49,15 +49,13 @@ pydot
 
 The maintainer's version doesn't work in
 Python2.7+; we're working on getting PyPi access, in the meantime use [this
-fork](https://github.com/nlhepler/pydot):
+fork](https://github.com/graingert/pydot/tree/patch-1):
 
 
 i.e.:
 
 ```bash
-$ git clone https://github.com/nlhepler/pydot.git
-$ cd pydot
-$ python setup.py install
+$ pip install https://github.com/graingert/pydot/archive/ba5d32bcc2a90bcb44593f94b14dde9424f9c7c6.tar.gz
 ```
 
 Usage
