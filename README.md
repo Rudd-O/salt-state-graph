@@ -1,43 +1,60 @@
-A tool for visualising the dependency graph of a
+# salt-state-graph
+
+This is a tool for visualising the runtime dependency graph of a
 [Salt](https://github.com/saltstack/salt) highstate.
 
-The utility ingests the YAML representing the Salt highstate (or sls state) for
-a single minion and produces a program written in DOT.
+It takes the json output of `state.show_highstate` or `state.show_sls` from
+Salt and produces a program written in
+[dot](http://www.graphviz.org/doc/info/lang.html), which is a tool from
+Graphviz for defining an acyclic graph.  
 
-An example: http://i.imgur.com/wETR0WG.png
+Some examples, with the dot programs rendered as png:
 
-Each node is a state. Edges are dependency relationships:
+http://i.imgur.com/wETR0WG.png
+http://i.imgur.com/LJ6ckzr.png
 
-* `require`
-* `require_in`
-* `watch`
-* `watch_in`
+## Usage
 
-requires are blue; watches are red.
+The tool expects the JSON output of `show_highstate` or `show_sls` over stdin.
+It outputs `dot` code representing the dependency graph. The dot code defines a
+single digraph called "states".
 
-Installation
-============
-System requirements:
+For example, if you have a salt master running:
 
-* dot
+	salt 'minion*' state.show_highstate --out json | salt_state_graph
 
-Python requirements:
+You can write the dot output to a file, or pipe it further into the `dot` tool
+from GraphViz. In this example, we produce a png called `output.png`:
 
-* pydot
-* PyYAML
+	salt 'minion*' state.show_highstate --out json \
+	| salt_state_graph \
+	| dot -Tpng -o output.png
 
-dot
----
+
+## Installation
+
+Install directly from PyPi:
+
+	pip install salt_state_graph
+
+Or clone this repository and use `setup.py`:
+
+	python setup.py install
+
+Unfortunately, the version of the `pydot` package in PyPi doesn't work in
+Python 2.7+. We're working on getting this up to date. In the meantime, please
+use this fork to install the `pydot` package first:
+
+https://github.com/nlhepler/pydot
+
+
+## dot
 
 Most operating systems have a package for it, usually as part of GraphViz.
 
-**Debian**:
+**Debian / Ubuntu**:
 
 	apt-get install graphviz
-
-**Arch**:
-
-	pacman -S graphviz
 
 **OSX with homebrew**:
 
@@ -47,16 +64,6 @@ Most operating systems have a package for it, usually as part of GraphViz.
 pydot
 -----
 
-The maintainer's version doesn't work in
-Python2.7+; we're working on getting PyPi access, in the meantime use [this
-fork](https://github.com/graingert/pydot/tree/patch-1):
-
-
-i.e.:
-
-```bash
-$ pip install https://github.com/graingert/pydot/archive/ba5d32bcc2a90bcb44593f94b14dde9424f9c7c6.tar.gz
-```
 
 Usage
 ====
@@ -80,3 +87,17 @@ $ dot -Tpng < ~/highstate.dot -o highstate.png
 ```bash
 $ dot -Tsvg < ~/highstate.dot -o highstate.svg
 ```
+
+## Running tests
+
+The test runner is [tox](https://tox.readthedocs.org/en/latest/). Run it from
+the root of the project. It will run tests for a number of different Python
+versions, as well as Flake8:
+
+	$ tox -l
+	py27
+	py34
+	pypy
+	flake8
+
+This will run all of the tests in python 2.7, 3.4 and pypy.

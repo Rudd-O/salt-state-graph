@@ -1,0 +1,2 @@
+include salt_state_graph/testdata/*.dot
+include salt_state_graph/testdata/*.json

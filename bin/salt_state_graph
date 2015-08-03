@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import sys
+import salt_state_graph
+
+
+def main():
+    g = salt_state_graph.Graph(sys.stdin)
+    sys.stdout.write(g.render("dot"))
+
+
+if __name__ == '__main__':
+    main()

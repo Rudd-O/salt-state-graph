@@ -1,0 +1,924 @@
+{
+    "stg-pgsql1.stg.lninfra.net": {
+        "ssl-install-chain": {
+            "__env__": "base", 
+            "__sls__": "core.learnosity_ssl", 
+            "file": [
+                {
+                    "name": "/etc/ssl/certs/2018-07-08-star.staging.learnosity.com.chain"
+                }, 
+                {
+                    "source": "salt://core/learnosity_ssl/2018-07-08-star.staging.learnosity.com.chain"
+                }, 
+                {
+                    "user": "root"
+                }, 
+                {
+                    "group": "adm"
+                }, 
+                {
+                    "mode": 644
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "ssl-install-cert"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10005
+                }
+            ]
+        }, 
+        "postgresql-archive-conf": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "file": [
+                {
+                    "name": "/etc/postgresql/9.3/main/conf.d/10_archive.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/postgresql/config/archive.jinja"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "postgresql-conf.d"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10015
+                }
+            ]
+        }, 
+        "postgresql-pam-common": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "file": [
+                {
+                    "name": "/etc/pam.d/common-session"
+                }, 
+                {
+                    "text": "session required pam_limits.so"
+                }, 
+                "append", 
+                {
+                    "order": 10019
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin5": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin5"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10030
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin3": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin3"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10023
+                }
+            ]
+        }, 
+        "ssl-learnosity-ca": {
+            "__env__": "base", 
+            "__sls__": "core.learnosity_ssl", 
+            "file": [
+                {
+                    "name": "/etc/ssl/ca_certs/learnosity-ca.pem"
+                }, 
+                {
+                    "source": "salt://core/learnosity_ssl/learnosity-ca.pem"
+                }, 
+                {
+                    "user": "root"
+                }, 
+                {
+                    "group": "adm"
+                }, 
+                {
+                    "mode": 644
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "ssl-install-chain"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10006
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin13": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin13"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10029
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin1": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin1"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10028
+                }
+            ]
+        }, 
+        "postgresql-zfs-chown": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.zfs", 
+            "file": [
+                {
+                    "name": "/var/lib/postgresql/9.3/main"
+                }, 
+                {
+                    "user": "postgres"
+                }, 
+                {
+                    "group": "postgres"
+                }, 
+                {
+                    "require": [
+                        {
+                            "cmd": "postgresql-zfs"
+                        }, 
+                        {
+                            "pkg": "postgresql"
+                        }
+                    ]
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "cmd": "postgresql"
+                        }
+                    ]
+                }, 
+                "directory", 
+                {
+                    "order": 10035
+                }
+            ]
+        }, 
+        "postgresql-logging-conf": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "file": [
+                {
+                    "name": "/etc/postgresql/9.3/main/conf.d/20_archive.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/postgresql/config/logging.jinja"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "postgresql-conf.d"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10016
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin9": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin9"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10022
+                }
+            ]
+        }, 
+        "postgresql-zfs": {
+            "__env__": "base", 
+            "cmd": [
+                {
+                    "name": "zfs create -o mountpoint=/var/lib/postgresql/9.3/main -o recordsize=16k tank/postgresql"
+                }, 
+                {
+                    "unless": "mountpoint /var/lib/postgresql/9.3/main > /dev/null"
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "cmd": "postgresql"
+                        }, 
+                        {
+                            "pkg": "postgresql"
+                        }
+                    ]
+                }, 
+                "run", 
+                {
+                    "order": 10034
+                }
+            ], 
+            "__sls__": "pkgs.postgresql.zfs"
+        }, 
+        "postgresql-admin-user-admin8": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin8"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10025
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin10": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin10"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10027
+                }
+            ]
+        }, 
+        "ssl-install-cert": {
+            "__env__": "base", 
+            "__sls__": "core.learnosity_ssl", 
+            "file": [
+                {
+                    "name": "/etc/ssl/certs/2018-07-08-star.staging.learnosity.com.crt"
+                }, 
+                {
+                    "source": "salt://core/learnosity_ssl/2018-07-08-star.staging.learnosity.com.crt"
+                }, 
+                {
+                    "user": "root"
+                }, 
+                {
+                    "group": "adm"
+                }, 
+                {
+                    "mode": 644
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "ssl-install-ca"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10004
+                }
+            ]
+        }, 
+        "ssl-learnosity": {
+            "__env__": "base", 
+            "cmd": [
+                {
+                    "name": "adduser www-data ssl-cert"
+                }, 
+                {
+                    "require": [
+                        {
+                            "group": "ssl-learnosity"
+                        }, 
+                        {
+                            "file": "ssl-install-cert"
+                        }
+                    ]
+                }, 
+                "wait", 
+                {
+                    "order": 10001
+                }
+            ], 
+            "group": [
+                {
+                    "name": "ssl-cert"
+                }, 
+                "present", 
+                {
+                    "order": 10000
+                }
+            ], 
+            "__sls__": "core.learnosity_ssl"
+        }, 
+        "postgresql-admin-user-admin12": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin12"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10032
+                }
+            ]
+        }, 
+        "postgresql-pg-hba": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "file": [
+                {
+                    "name": "/etc/postgresql/9.3/main/pg_hba.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/postgresql/config/pg_hba.conf"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "user": "postgres"
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "postgresql-conf"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10012
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin7": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin7"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10033
+                }
+            ]
+        }, 
+        "postgresql-pam-common-noninter": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "file": [
+                {
+                    "name": "/etc/pam.d/common-session-noninteractive"
+                }, 
+                {
+                    "text": "session required pam_limits.so"
+                }, 
+                "append", 
+                {
+                    "order": 10020
+                }
+            ]
+        }, 
+        "postgresql-conf": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "file": [
+                {
+                    "name": "/etc/postgresql/9.3/main/postgresql.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/postgresql/config/postgresql.conf"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "user": "postgres"
+                }, 
+                {
+                    "context": {
+                        "version": 9.3, 
+                        "data_dir": "/var/lib/postgresql/9.3/main", 
+                        "port": 5432, 
+                        "listen_addr": "*"
+                    }
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "postgresql"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10011
+                }
+            ]
+        }, 
+        "postgresql-pam-su": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "file": [
+                {
+                    "name": "/etc/pam.d/su"
+                }, 
+                {
+                    "text": "session required pam_limits.so"
+                }, 
+                "append", 
+                {
+                    "order": 10018
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin6": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin6"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10031
+                }
+            ]
+        }, 
+        "postgresql-conf.d": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "file": [
+                {
+                    "name": "/etc/postgresql/9.3/main/conf.d"
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "postgresql-conf"
+                        }
+                    ]
+                }, 
+                "directory", 
+                {
+                    "order": 10013
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin4": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin4"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10021
+                }
+            ]
+        }, 
+        "postgresql": {
+            "pkgrepo": [
+                {
+                    "file": "/etc/apt/sources.list.d/pgdg.list"
+                }, 
+                {
+                    "name": "deb http://apt.postgresql.org/pub/repos/apt trusty-pgdg main"
+                }, 
+                {
+                    "key_url": "http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc"
+                }, 
+                "managed", 
+                {
+                    "order": 10010
+                }
+            ], 
+            "service": [
+                {
+                    "enable": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "postgresql"
+                        }
+                    ]
+                }, 
+                "running", 
+                {
+                    "order": 10009
+                }
+            ], 
+            "pkg": [
+                {
+                    "names": [
+                        "postgresql-9.3", 
+                        "postgresql-contrib-9.3"
+                    ]
+                }, 
+                {
+                    "require": [
+                        {
+                            "user": "postgresql"
+                        }, 
+                        {
+                            "pkgrepo": "postgresql"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10008
+                }
+            ], 
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "user": [
+                {
+                    "name": "postgres"
+                }, 
+                {
+                    "home": "/var/lib/postgresql"
+                }, 
+                {
+                    "shell": "/bin/bash"
+                }, 
+                {
+                    "require": [
+                        {
+                            "group": "ssl-learnosity"
+                        }
+                    ]
+                }, 
+                {
+                    "groups": [
+                        "ssl-cert", 
+                        "adm"
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10007
+                }
+            ]
+        }, 
+        "ssl-certs": {
+            "__env__": "base", 
+            "__sls__": "core.learnosity_ssl", 
+            "file": [
+                {
+                    "name": "/etc/ssl/private/2018-07-08-star.staging.learnosity.com.key"
+                }, 
+                {
+                    "source": "salt://core/learnosity_ssl/2018-07-08-star.staging.learnosity.com.key"
+                }, 
+                {
+                    "user": "root"
+                }, 
+                {
+                    "group": "adm"
+                }, 
+                {
+                    "mode": 600
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "ssl-learnosity-ca"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10002
+                }
+            ]
+        }, 
+        "postgresql-memory-conf": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "file": [
+                {
+                    "name": "/etc/postgresql/9.3/main/conf.d/00_conns_memory.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/postgresql/config/memory.jinja"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "postgresql-conf.d"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10014
+                }
+            ]
+        }, 
+        "ssl-install-ca": {
+            "__env__": "base", 
+            "__sls__": "core.learnosity_ssl", 
+            "file": [
+                {
+                    "name": "/etc/ssl/ca_certs/2018-07-08-star.staging.learnosity.com.ca"
+                }, 
+                {
+                    "source": "salt://core/learnosity_ssl/2018-07-08-star.staging.learnosity.com.ca"
+                }, 
+                {
+                    "makedirs": true
+                }, 
+                {
+                    "user": "root"
+                }, 
+                {
+                    "group": "adm"
+                }, 
+                {
+                    "mode": 644
+                }, 
+                "managed", 
+                {
+                    "order": 10003
+                }
+            ]
+        }, 
+        "postgresql-ulimits": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "file": [
+                {
+                    "name": "/etc/security/limits.d/postgres.conf"
+                }, 
+                {
+                    "contents": "postgres hard nofile 32768\npostgres soft nofile 32768\n"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "postgresql"
+                        }, 
+                        {
+                            "file": "postgresql-pam-su"
+                        }, 
+                        {
+                            "file": "postgresql-pam-common"
+                        }, 
+                        {
+                            "file": "postgresql-pam-common-noninter"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10017
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin11": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin11"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10026
+                }
+            ]
+        }, 
+        "postgresql-admin-user-admin2": {
+            "__env__": "base", 
+            "__sls__": "pkgs.postgresql.base", 
+            "postgres_user": [
+                {
+                    "name": "admin2"
+                }, 
+                {
+                    "superuser": true
+                }, 
+                {
+                    "require": [
+                        {
+                            "service": "postgresql"
+                        }
+                    ]
+                }, 
+                "present", 
+                {
+                    "order": 10024
+                }
+            ]
+        }
+    }
+}
