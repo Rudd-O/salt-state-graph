@@ -1,0 +1,1371 @@
+{
+    "stg-workera1.stg.lninfra.net": {
+        "snmpd-config-dir": {
+            "__env__": "base", 
+            "__sls__": "pkgs.snmpd", 
+            "file": [
+                {
+                    "name": "/etc/snmp/conf.d"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "snmpd"
+                        }
+                    ]
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "service": "snmpd"
+                        }
+                    ]
+                }, 
+                "directory", 
+                {
+                    "order": 10034
+                }
+            ]
+        }, 
+        "snmp-client": {
+            "__env__": "base", 
+            "__sls__": "pkgs.snmp", 
+            "pkg": [
+                {
+                    "name": "snmp"
+                }, 
+                "installed", 
+                {
+                    "order": 10022
+                }
+            ], 
+            "file": [
+                {
+                    "name": "/etc/snmp/snmp.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/snmp/snmp.conf"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "snmp"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10023
+                }
+            ]
+        }, 
+        "install-php5-gd": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "php5-gd"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10001
+                }
+            ]
+        }, 
+        "install-php5-mysql": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "php5-mysql"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "install-php5-curl"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10003
+                }
+            ]
+        }, 
+        "install-php5-pgsql": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "php5-pgsql"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "install-php5-intl"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10007
+                }
+            ]
+        }, 
+        "php5-session-config": {
+            "__env__": "base", 
+            "cmd": [
+                {
+                    "name": "php5enmod session"
+                }, 
+                {
+                    "watch": [
+                        {
+                            "file": "php5-session-config"
+                        }
+                    ]
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "file": "php5-all-installed"
+                        }
+                    ]
+                }, 
+                "wait", 
+                {
+                    "order": 10014
+                }
+            ], 
+            "__sls__": "pkgs.php5", 
+            "file": [
+                {
+                    "name": "/etc/php5/mods-available/session.ini"
+                }, 
+                {
+                    "contents": "session.save_handler = \"memcached\"\nsession.save_path = \"memcache.stg.lninfra.net:11211\"\n"
+                }, 
+                {
+                    "onlyif": "test -d /etc/php5/mods-available"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10013
+                }
+            ]
+        }, 
+        "pass-persist-script-config-dir": {
+            "__env__": "base", 
+            "__sls__": "devops.monitoring", 
+            "file": [
+                {
+                    "name": "/etc/snmp/scripts/config"
+                }, 
+                {
+                    "user": "snmp"
+                }, 
+                {
+                    "group": "adm"
+                }, 
+                {
+                    "mode": 770
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "pass-persist-script"
+                        }
+                    ]
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "service": "snmpd"
+                        }
+                    ]
+                }, 
+                "directory", 
+                {
+                    "order": 10036
+                }
+            ]
+        }, 
+        "apc": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5.apc", 
+            "pkg": [
+                {
+                    "name": "redis-server"
+                }, 
+                "installed", 
+                {
+                    "order": 10046
+                }
+            ], 
+            "file": [
+                {
+                    "name": "/etc/php5/global_prepend.php"
+                }, 
+                {
+                    "marker_start": "/** START apc.sls -DO-NOT-EDIT- **/"
+                }, 
+                {
+                    "marker_end": "/** END apc.sls **/"
+                }, 
+                {
+                    "content": "require(\"/usr/share/php/FakeApc.php\");"
+                }, 
+                {
+                    "append_if_not_found": true
+                }, 
+                {
+                    "show_changes": true
+                }, 
+                {
+                    "backup": false
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "php5-prepend-file"
+                        }, 
+                        {
+                            "file": "php5-fake-apc-file"
+                        }, 
+                        {
+                            "file": "apc-cleanup-ini"
+                        }, 
+                        {
+                            "pkg": "apc-absent"
+                        }
+                    ]
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "file": "php5-all-installed"
+                        }
+                    ]
+                }, 
+                "blockreplace", 
+                {
+                    "order": 10047
+                }
+            ]
+        }, 
+        "__extend__": [
+            {
+                "apc": {
+                    "__env__": "base", 
+                    "cmd": [
+                        {
+                            "watch_in": [
+                                {
+                                    "service": "php5-fpm"
+                                }
+                            ]
+                        }, 
+                        "wait"
+                    ], 
+                    "__sls__": "pkgs.php5.fpm"
+                }
+            }, 
+            {
+                "redis-server": {
+                    "__env__": "base", 
+                    "__sls__": "pkgs.redis.ephemeral", 
+                    "file": [
+                        {
+                            "context": {
+                                "persist": false
+                            }
+                        }, 
+                        "managed"
+                    ]
+                }
+            }, 
+            {
+                "snmp-client": {
+                    "__env__": "base", 
+                    "__sls__": "pkgs.snmpd", 
+                    "pkg": [
+                        {
+                            "require-in": [
+                                {
+                                    "pkg": "snmpd"
+                                }
+                            ]
+                        }, 
+                        "installed"
+                    ]
+                }
+            }
+        ], 
+        "install-php5-memcached": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "php5-memcached"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "install-libssh2-php"
+                        }
+                    ]
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "file": "php5-all-installed"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10010
+                }
+            ]
+        }, 
+        "php5-fpm-ini": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5.fpm", 
+            "file": [
+                {
+                    "name": "/etc/php5/fpm/php.ini"
+                }, 
+                {
+                    "source": "salt://pkgs/php5/conf/fpm-php.ini"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5-fpm"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "php5-fpm"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10054
+                }
+            ]
+        }, 
+        "snmpd-defaults": {
+            "__env__": "base", 
+            "__sls__": "pkgs.snmpd", 
+            "file": [
+                {
+                    "name": "/etc/default/snmpd"
+                }, 
+                {
+                    "source": "salt://pkgs/snmpd/default.conf"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "snmpd"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "snmpd"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10031
+                }
+            ]
+        }, 
+        "install-php5-sqlite": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "php5-sqlite"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "install-php5-mcrypt"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10005
+                }
+            ]
+        }, 
+        "php5-timezone-config": {
+            "__env__": "base", 
+            "cmd": [
+                {
+                    "name": "php5enmod timezone"
+                }, 
+                {
+                    "watch": [
+                        {
+                            "file": "php5-timezone-config"
+                        }
+                    ]
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "file": "php5-all-installed"
+                        }
+                    ]
+                }, 
+                "wait", 
+                {
+                    "order": 10012
+                }
+            ], 
+            "__sls__": "pkgs.php5", 
+            "file": [
+                {
+                    "name": "/etc/php5/mods-available/timezone.ini"
+                }, 
+                {
+                    "contents": "date.timezone = \"UTC\""
+                }, 
+                {
+                    "onlyif": "test -d /etc/php5/mods-available"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10011
+                }
+            ]
+        }, 
+        "install-libssh2-php": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "libssh2-php"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "install-php5-tidy"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10009
+                }
+            ]
+        }, 
+        "snmpd": {
+            "service": [
+                {
+                    "name": "snmpd"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "snmpd"
+                        }
+                    ]
+                }, 
+                "running", 
+                {
+                    "order": 10029
+                }
+            ], 
+            "__env__": "base", 
+            "__sls__": "pkgs.snmpd", 
+            "pkg": [
+                {
+                    "name": "snmpd"
+                }, 
+                "installed", 
+                {
+                    "order": 10028
+                }
+            ], 
+            "file": [
+                {
+                    "name": "/etc/snmp/snmpd.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/snmpd/snmpd.conf"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "snmpd"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "snmpd"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10030
+                }
+            ]
+        }, 
+        "php-pear-predis-channel": {
+            "__env__": "base", 
+            "cmd": [
+                {
+                    "name": "pear channel-discover pear.nrk.io"
+                }, 
+                {
+                    "unless": "test -f /usr/share/php/.channels/pear.nrk.io.reg"
+                }, 
+                {
+                    "require": [
+                        {
+                            "cmd": "php-pear"
+                        }
+                    ]
+                }, 
+                "run", 
+                {
+                    "order": 10044
+                }
+            ], 
+            "__sls__": "pkgs.redis.phpclient"
+        }, 
+        "apc-cleanup-ini": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5.apc", 
+            "file": [
+                {
+                    "name": "/etc/php5/mods-available/fake_apc.ini"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5"
+                        }
+                    ]
+                }, 
+                "absent", 
+                {
+                    "order": 10048
+                }
+            ]
+        }, 
+        "install-php5-mcrypt": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "php5-mcrypt"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "install-php5-mysql"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10004
+                }
+            ]
+        }, 
+        "mib-downloader": {
+            "__env__": "base", 
+            "__sls__": "pkgs.snmp", 
+            "pkgrepo": [
+                {
+                    "name": "deb http://us.archive.ubuntu.com/ubuntu/ trusty multiverse"
+                }, 
+                {
+                    "file": "/etc/apt/sources.list.d/multiverse.list"
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "pkg": "mib-downloader"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10024
+                }
+            ], 
+            "file": [
+                {
+                    "name": "/etc/apt/sources.list.d/multuverse.list"
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "pkg": "mib-downloader"
+                        }
+                    ]
+                }, 
+                "absent", 
+                {
+                    "order": 10025
+                }
+            ], 
+            "pkg": [
+                {
+                    "name": "snmp-mibs-downloader"
+                }, 
+                "installed", 
+                {
+                    "order": 10026
+                }
+            ]
+        }, 
+        "install-php5-intl": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "php5-intl"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "install-php5-sqlite"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10006
+                }
+            ]
+        }, 
+        "php5": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "php5-cli"
+                }, 
+                "installed", 
+                {
+                    "order": 10000
+                }
+            ]
+        }, 
+        "php5-fpm": {
+            "file": [
+                {
+                    "name": "/etc/php5/fpm/pool.d/www.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/php5/conf/php5-fpm-pool.conf"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5-fpm"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "php5-fpm"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10052
+                }
+            ], 
+            "__env__": "base", 
+            "__sls__": "pkgs.php5.fpm", 
+            "pkg": [
+                {
+                    "name": "php5-fpm"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10051
+                }
+            ], 
+            "service": [
+                {
+                    "name": "php5-fpm"
+                }, 
+                {
+                    "watch": [
+                        {
+                            "file": "php5-fpm"
+                        }, 
+                        {
+                            "pkg": "install-php5-gd"
+                        }, 
+                        {
+                            "pkg": "install-php5-curl"
+                        }, 
+                        {
+                            "pkg": "install-php5-mysql"
+                        }, 
+                        {
+                            "pkg": "install-php5-mcrypt"
+                        }, 
+                        {
+                            "pkg": "install-php5-sqlite"
+                        }, 
+                        {
+                            "pkg": "install-php5-intl"
+                        }, 
+                        {
+                            "pkg": "install-php5-pgsql"
+                        }, 
+                        {
+                            "pkg": "install-php5-tidy"
+                        }, 
+                        {
+                            "pkg": "install-libssh2-php"
+                        }, 
+                        {
+                            "pkg": "install-php5-memcached"
+                        }
+                    ]
+                }, 
+                "running", 
+                {
+                    "order": 10053
+                }
+            ]
+        }, 
+        "php-pear-predis": {
+            "__env__": "base", 
+            "cmd": [
+                {
+                    "name": "pear install nrk/predis"
+                }, 
+                {
+                    "watch": [
+                        {
+                            "cmd": "php-pear-predis-channel"
+                        }
+                    ]
+                }, 
+                "wait", 
+                {
+                    "order": 10045
+                }
+            ], 
+            "__sls__": "pkgs.redis.phpclient"
+        }, 
+        "snmpd-scripts": {
+            "__env__": "base", 
+            "__sls__": "pkgs.snmpd", 
+            "file": [
+                {
+                    "name": "/etc/snmp/scripts"
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "service": "snmpd"
+                        }
+                    ]
+                }, 
+                "directory", 
+                {
+                    "order": 10033
+                }
+            ]
+        }, 
+        "snmptrapd-config": {
+            "__env__": "base", 
+            "__sls__": "pkgs.snmpd", 
+            "file": [
+                {
+                    "name": "/etc/snmp/snmptrapd.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/snmpd/snmptrapd.conf"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "snmpd"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "snmpd"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10032
+                }
+            ]
+        }, 
+        "php5-prepend-file": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "file": [
+                {
+                    "name": "/etc/php5/global_prepend.php"
+                }, 
+                {
+                    "replace": false
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5"
+                        }
+                    ]
+                }, 
+                {
+                    "contents": "<?php\n// DO NOT MODIFY THIS FILE!\n// This file is installed by Salt but it is \"file.blockreplace\" managed.\n// This means Salt will only make changes inside one of the blocks.\n//\n"
+                }, 
+                "managed", 
+                {
+                    "order": 10017
+                }
+            ]
+        }, 
+        "php5-append-file": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "file": [
+                {
+                    "name": "/etc/php5/global_append.php"
+                }, 
+                {
+                    "replace": false
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5"
+                        }
+                    ]
+                }, 
+                {
+                    "contents": "<?php\n// DO NOT MODIFY THIS FILE!\n// This file is installed by Salt but it is \"file.blockreplace\" managed.\n// This means Salt will only make changes inside one of the blocks.\n//\n"
+                }, 
+                "managed", 
+                {
+                    "order": 10020
+                }
+            ]
+        }, 
+        "redis-server-snmp-append-proc": {
+            "__env__": "base", 
+            "__sls__": "pkgs.redis", 
+            "file": [
+                {
+                    "name": "/etc/snmp/conf.d/redis-server-process.conf"
+                }, 
+                {
+                    "contents": "proc redis-server 0 1"
+                }, 
+                {
+                    "require": [
+                        {
+                            "file": "snmpd-config-dir"
+                        }
+                    ]
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "file": "snmpd"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "snmpd"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10038
+                }
+            ]
+        }, 
+        "php5-all-installed": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "file": [
+                {
+                    "name": "/dev/null"
+                }, 
+                "touch", 
+                {
+                    "order": 10021
+                }
+            ]
+        }, 
+        "php5-fake-apc-file": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5.apc", 
+            "file": [
+                {
+                    "name": "/usr/share/php/FakeApc.php"
+                }, 
+                {
+                    "source": "salt://pkgs/php5/FakeApc.php"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5"
+                        }, 
+                        {
+                            "cmd": "php-pear-predis"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10050
+                }
+            ]
+        }, 
+        "apc-absent": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5.apc", 
+            "pkg": [
+                {
+                    "names": [
+                        "php5-apcu", 
+                        "php-apc"
+                    ]
+                }, 
+                "purged", 
+                {
+                    "order": 10049
+                }
+            ]
+        }, 
+        "redis-server": {
+            "file": [
+                {
+                    "name": "/etc/redis/redis.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/redis/redis.conf"
+                }, 
+                {
+                    "user": "redis"
+                }, 
+                {
+                    "mode": 600
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "context": {
+                        "persist": true
+                    }
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "redis-server"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10040
+                }
+            ], 
+            "__env__": "base", 
+            "__sls__": "pkgs.redis", 
+            "pkg": [
+                {
+                    "name": "redis-server"
+                }, 
+                "installed", 
+                {
+                    "order": 10039
+                }
+            ], 
+            "service": [
+                {
+                    "name": "redis-server"
+                }, 
+                {
+                    "watch": [
+                        {
+                            "file": "redis-server"
+                        }
+                    ]
+                }, 
+                "running", 
+                {
+                    "order": 10041
+                }
+            ]
+        }, 
+        "php-pear": {
+            "cmd": [
+                {
+                    "name": "pear config-set auto_discover 1"
+                }, 
+                {
+                    "watch": [
+                        {
+                            "pkg": "php-pear"
+                        }
+                    ]
+                }, 
+                "wait", 
+                {
+                    "order": 10043
+                }
+            ], 
+            "__env__": "base", 
+            "__sls__": "pkgs.php5.pear", 
+            "pkg": [
+                {
+                    "name": "php-pear"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10042
+                }
+            ]
+        }, 
+        "php5-fpm-upstart": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5.fpm", 
+            "file": [
+                {
+                    "name": "/etc/init/php5-fpm.conf"
+                }, 
+                {
+                    "source": "salt://pkgs/php5/conf/php5-fpm-upstart.conf"
+                }, 
+                {
+                    "template": "jinja"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "php5-fpm"
+                        }
+                    ]
+                }, 
+                {
+                    "watch_in": [
+                        {
+                            "service": "php5-fpm"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10055
+                }
+            ]
+        }, 
+        "learnosity-mib": {
+            "__env__": "base", 
+            "__sls__": "pkgs.snmp", 
+            "file": [
+                {
+                    "name": "/usr/share/snmp/mibs/LEARNOSITY-MIB.txt"
+                }, 
+                {
+                    "source": "salt://pkgs/snmp/LEARNOSITY-MIB.txt"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "snmp-client"
+                        }, 
+                        {
+                            "pkg": "mib-downloader"
+                        }
+                    ]
+                }, 
+                "managed", 
+                {
+                    "order": 10027
+                }
+            ]
+        }, 
+        "install-php5-curl": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "php5-curl"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "install-php5-gd"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10002
+                }
+            ]
+        }, 
+        "pass-persist-script": {
+            "__env__": "base", 
+            "__sls__": "devops.monitoring", 
+            "file": [
+                {
+                    "name": "/etc/snmp/scripts/lib/"
+                }, 
+                {
+                    "source": "salt://devops/monitoring/lib/"
+                }, 
+                {
+                    "makedirs": true
+                }, 
+                {
+                    "user": "snmp"
+                }, 
+                {
+                    "exclude_pat": "E@(.*\\.swp)|(.*\\.pyc)"
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "service": "snmpd"
+                        }
+                    ]
+                }, 
+                "recurse", 
+                {
+                    "order": 10037
+                }
+            ]
+        }, 
+        "snmp-user-groups": {
+            "__env__": "base", 
+            "cmd": [
+                {
+                    "name": "usermod -G snmp,adm snmp"
+                }, 
+                {
+                    "unless": "grep adm /etc/group | grep snmp"
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "service": "snmpd"
+                        }
+                    ]
+                }, 
+                "run", 
+                {
+                    "order": 10035
+                }
+            ], 
+            "__sls__": "pkgs.snmpd"
+        }, 
+        "install-php5-tidy": {
+            "__env__": "base", 
+            "__sls__": "pkgs.php5", 
+            "pkg": [
+                {
+                    "name": "php5-tidy"
+                }, 
+                {
+                    "require": [
+                        {
+                            "pkg": "install-php5-pgsql"
+                        }
+                    ]
+                }, 
+                "installed", 
+                {
+                    "order": 10008
+                }
+            ]
+        }, 
+        "php5-prepend-config": {
+            "__env__": "base", 
+            "cmd": [
+                {
+                    "name": "php5enmod prepend"
+                }, 
+                {
+                    "watch": [
+                        {
+                            "file": "php5-prepend-config"
+                        }
+                    ]
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "file": "php5-all-installed"
+                        }
+                    ]
+                }, 
+                "wait", 
+                {
+                    "order": 10016
+                }
+            ], 
+            "__sls__": "pkgs.php5", 
+            "file": [
+                {
+                    "name": "/etc/php5/mods-available/prepend.ini"
+                }, 
+                {
+                    "onlyif": "test -d /etc/php5/mods-available"
+                }, 
+                {
+                    "watch": [
+                        {
+                            "file": "php5-prepend-file"
+                        }
+                    ]
+                }, 
+                {
+                    "contents": "auto_prepend_file = /etc/php5/global_prepend.php"
+                }, 
+                "managed", 
+                {
+                    "order": 10015
+                }
+            ]
+        }, 
+        "php5-append-config": {
+            "__env__": "base", 
+            "cmd": [
+                {
+                    "name": "php5enmod append"
+                }, 
+                {
+                    "watch": [
+                        {
+                            "file": "php5-append-config"
+                        }
+                    ]
+                }, 
+                {
+                    "require_in": [
+                        {
+                            "file": "php5-all-installed"
+                        }
+                    ]
+                }, 
+                "wait", 
+                {
+                    "order": 10019
+                }
+            ], 
+            "__sls__": "pkgs.php5", 
+            "file": [
+                {
+                    "name": "/etc/php5/mods-available/append.ini"
+                }, 
+                {
+                    "onlyif": "test -d /etc/php5/mods-available"
+                }, 
+                {
+                    "watch": [
+                        {
+                            "file": "php5-append-file"
+                        }
+                    ]
+                }, 
+                {
+                    "contents": "auto_append_file = /etc/php5/global_append.php"
+                }, 
+                "managed", 
+                {
+                    "order": 10018
+                }
+            ]
+        }
+    }
+}

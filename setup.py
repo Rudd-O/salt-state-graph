@@ -10,7 +10,7 @@ VERSION = '0.0.1'
 #        os.path.join(os.path.dirname(__file__),
 #            "requirements.txt"), session=uuid.uuid1())
 
-test_requirements = ['pytest==2.7.2', 'flake8']
+test_requirements = ['pytest==2.7.2', 'pytest-cov==2.0.0', 'flake8']
 
 setup = dict(
     author='Cera Davies',
