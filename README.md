@@ -61,33 +61,11 @@ Most operating systems have a package for it, usually as part of GraphViz.
 
 	brew install graphviz
 
+## TODO
 
-pydot
------
-
-
-Usage
-====
-
-Example:
-
-```bash
-# Run a show_highstate for a single minion and get the output as YAML
-$ salt-call state.show_highstate --out yaml > ~/highstate
-
-# Run salt-state-graph with the recorded highstate as stdin
-$ python salt-state-graph.py < ~/highstate > ~/highstate.dot
-```
-
-Now you can use the [`dot`](http://en.wikipedia.org/wiki/DOT_%28graph_description_language%29) utility to compile this into a graph:
-
-```bash
-$ dot -Tpng < ~/highstate.dot -o highstate.png
-```
-
-```bash
-$ dot -Tsvg < ~/highstate.dot -o highstate.svg
-```
+* support backends aside from dot (e.g. JSON to feed into D3)
+* add more tests
+* add `pydot` as a proper dependency once it's updated in pypi
 
 ## Running tests
 
