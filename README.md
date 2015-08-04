@@ -24,7 +24,7 @@ single digraph called "states".
 
 For example, if you have a salt master running:
 
-	salt 'minion*' state.show_highstate --out json | salt_state_graph
+	salt 'minion1' state.show_highstate --out json | salt_state_graph
 
 You can write the dot output to a file, or pipe it further into the `dot` tool
 from GraphViz. In this example, we produce a png called `output.png`:
@@ -33,6 +33,8 @@ from GraphViz. In this example, we produce a png called `output.png`:
 	| salt_state_graph \
 	| dot -Tpng -o output.png
 
+The tool currently only supports rendering the output from one minion. If you
+give it output with two minions, it'll report an error.
 
 ## Installation
 
