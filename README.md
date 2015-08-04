@@ -6,7 +6,9 @@ This is a tool for visualising the runtime dependency graph of a
 It takes the json output of `state.show_highstate` or `state.show_sls` from
 Salt and produces a program written in
 [dot](http://www.graphviz.org/doc/info/lang.html), which is a tool from
-Graphviz for defining an acyclic graph.  
+Graphviz for defining an acyclic graph.
+
+States are nodes and dependencies are edges. `require` and `require_in` are blue; `watch` and `watch_in` are red.
 
 Some examples, with the dot programs rendered as png:
 
