@@ -75,6 +75,8 @@ class Graph(object):
             'require_in': {'color': 'blue', 'reverse': True},
             'watch': {'color': 'red'},
             'watch_in': {'color': 'red', 'reverse': True},
+            'onchanges': {'color': 'green'},
+            'onfail': {'color': 'yellow'},
         }
 
         if len(state_obj.keys()) > 1:
