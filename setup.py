@@ -1,5 +1,5 @@
 import os
-import pip.req
+#import pip.req
 import uuid
 import setuptools
 
