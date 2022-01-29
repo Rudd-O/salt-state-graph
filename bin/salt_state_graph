@@ -16,7 +16,10 @@ def main():
         args.remove("--display")
 
     if args:
-        f = open(args[0], "r")
+        if args[0] == "-":
+            f = sys.stdin
+        else:
+            f = open(args[0], "r")
     else:
         f = sys.stdin
 
