@@ -1,12 +1,54 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+import tempfile
+import subprocess
 import sys
+import os
 import salt_state_graph
+import time
 
 
 def main():
-    g = salt_state_graph.Graph(sys.stdin)
-    sys.stdout.write(g.render("dot"))
+    args = sys.argv[1:]
+    display = False
+    while "--display" in args:
+        display = True
+        args.remove("--display")
+
+    if args:
+        f = open(args[0], "r")
+    else:
+        f = sys.stdin
+
+    if display and args[1:]:
+        print("usage error: --display and an output file name are incompatible", file=sys.stderr)
+        sys.exit(os.EX_USAGE)
+    elif args[1:]:
+        o = open(args[1], "w")
+    elif display:
+        o = None
+    else:
+        o = sys.stdout
+
+    try:
+        g = salt_state_graph.Graph(f)
+        if display:
+            with tempfile.NamedTemporaryFile(mode="w") as o:
+                o.write(g.render("dot"))
+                o.flush()
+                o.seek(0, 0)
+                with tempfile.NamedTemporaryFile(mode="w+", suffix=".pdf") as p:
+                    subprocess.check_call(["dot", "-Tpdf"], stdin=o, stdout=p)
+                    subprocess.check_call(["xdg-open", p.name])
+                    # Horrible hack to wait until the file is open, because
+                    # xdg-open does not wait until the program is done.
+                    time.sleep(5)
+        else:
+            o.write(g.render("dot"))
+    finally:
+        f.close()
+        if o:
+            o.close()
 
 
 if __name__ == '__main__':
