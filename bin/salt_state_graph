@@ -24,7 +24,10 @@ def main():
         f = sys.stdin
 
     if display and args[1:]:
-        print("usage error: --display and an output file name are incompatible", file=sys.stderr)
+        print(
+            "usage error: --display and an output file name are incompatible",
+            file=sys.stderr,
+        )
         sys.exit(os.EX_USAGE)
     elif args[1:]:
         o = open(args[1], "w")
@@ -54,5 +57,5 @@ def main():
             o.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
