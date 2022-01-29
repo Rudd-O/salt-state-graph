@@ -4,7 +4,7 @@ import uuid
 import setuptools
 
 
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 
 test_requirements = ['pytest==2.7.2', 'pytest-cov==2.0.0', 'flake8']
 
