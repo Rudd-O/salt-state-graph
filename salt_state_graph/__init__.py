@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import json
-import pydot
 import sys
+
+import pydot
 
 
 def find(obj, find_key):
@@ -25,7 +26,7 @@ def find_inner(obj, find_key):
     """
     results = []
 
-    if not hasattr(obj, '__iter__'):
+    if not hasattr(obj, "__iter__"):
         # not a sequence type - return nothing
         # this excludes strings
         return results
@@ -65,38 +66,40 @@ def find_edges(states, relname):
 
 
 class Graph(object):
-
     def __init__(self, input):
         state_obj = json.load(input)
-        self.graph = pydot.Dot("states", graph_type='digraph')
+        self.graph = pydot.Dot("states", graph_type="digraph")
 
         rules = {
-            'require': {'color': 'blue'},
-            'require_in': {'color': 'blue', 'reverse': True},
-            'watch': {'color': 'red'},
-            'watch_in': {'color': 'red', 'reverse': True},
-            'onchanges': {'color': 'green'},
-            'onchanges_in': {'color': 'green', 'reverse': True},
+            "require": {"color": "blue"},
+            "require_in": {"color": "blue", "reverse": True},
+            "watch": {"color": "red"},
+            "watch_in": {"color": "red", "reverse": True},
+            "onchanges": {"color": "green"},
+            "onchanges_in": {"color": "green", "reverse": True},
         }
 
         if len(state_obj.keys()) > 1:
             raise Exception(
                 "Unsupported: graph for multiple minions: {}".format(
-                    ",".join(state_obj)))
+                    ",".join(state_obj)
+                )
+            )
 
         minion_obj = list(state_obj.values())[0]
         for top_key, props in minion_obj.items():
             # Add a node for each state type embedded in this state
             # keys starting with underscores are not candidates
 
-            if top_key == '__extend__':
+            if top_key == "__extend__":
                 # TODO - merge these into the main states and remove them
                 sys.stderr.write(
-                    "Removing __extend__ states:\n{0}\n".format(str(props)))
+                    "Removing __extend__ states:\n{0}\n".format(str(props))
+                )
                 continue
 
             for top_key_type, states in list(props.items()):
-                if top_key_type[:2] == '__':
+                if top_key_type[:2] == "__":
                     continue
 
                 node_name = make_node_name(top_key_type, top_key)
@@ -104,15 +107,17 @@ class Graph(object):
 
                 for edge_type, ruleset in list(rules.items()):
                     for relname in find_edges(states, edge_type):
-                        if 'reverse' in ruleset and ruleset['reverse']:
-                            self.graph.add_edge(pydot.Edge(
-                                node_name, relname, color=ruleset['color']))
+                        if "reverse" in ruleset and ruleset["reverse"]:
+                            self.graph.add_edge(
+                                pydot.Edge(node_name, relname, color=ruleset["color"])
+                            )
                         else:
-                            self.graph.add_edge(pydot.Edge(
-                                relname, node_name, color=ruleset['color']))
+                            self.graph.add_edge(
+                                pydot.Edge(relname, node_name, color=ruleset["color"])
+                            )
 
     def render(self, fmt):
-        if fmt == 'dot':
+        if fmt == "dot":
             return self.graph.to_string()
         else:
             pass
