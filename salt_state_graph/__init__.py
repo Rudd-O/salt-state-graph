@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import collections
 import json
 import sys
 
@@ -67,7 +68,7 @@ def find_edges(states, relname):
 
 class Graph(object):
     def __init__(self, input):
-        state_obj = json.load(input)
+        state_obj = json.load(input, object_pairs_hook=collections.OrderedDict)
         self.graph = pydot.Dot("states", graph_type="digraph")
 
         rules = {
@@ -87,16 +88,43 @@ class Graph(object):
             )
 
         minion_obj = list(state_obj.values())[0]
+
+        if "__extend__" in minion_obj:
+            for extend_element in minion_obj["__extend__"]:
+                for state_name, extend_block in extend_element.items():
+                    for extend_type, extend_value in extend_block.items():
+                        if extend_type[:2] == "__":
+                            continue
+                        if state_name not in minion_obj:
+                            minion_obj[state_name] = collections.OrderedDict()
+                        if extend_type not in minion_obj[state_name]:
+                            minion_obj[state_name][extend_type] = []
+                        extended_state = minion_obj[state_name][extend_type]
+
+                        def get_subprop(s, n):
+                            for x in s:
+                                if hasattr(x, "items") and n in x:
+                                    return x[n]
+
+                        for rule in rules:
+                            extend_state_req = get_subprop(extend_value, rule)
+                            extended_state_req = get_subprop(extended_state, rule)
+                            if extend_state_req:
+                                if extended_state_req:
+                                    extended_state_req.extend(extend_state_req)
+                                else:
+                                    extended_state.append(
+                                        [
+                                            collections.OrderedDict(
+                                                {rule: extend_state_req}
+                                            )
+                                        ]
+                                    )
+            del minion_obj["__extend__"]
+
         for top_key, props in minion_obj.items():
             # Add a node for each state type embedded in this state
             # keys starting with underscores are not candidates
-
-            if top_key == "__extend__":
-                # TODO - merge these into the main states and remove them
-                sys.stderr.write(
-                    "Removing __extend__ states:\n{0}\n".format(str(props))
-                )
-                continue
 
             for top_key_type, states in list(props.items()):
                 if top_key_type[:2] == "__":

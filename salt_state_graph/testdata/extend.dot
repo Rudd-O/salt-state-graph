@@ -1,0 +1,20 @@
+digraph states {
+"SALT - Configure test on roxanne";
+"SALT - Configure test on penny";
+"TEST - AnsibleLike test start";
+"TEST - AnsibleLike test start" -> "SALT - Configure test on roxanne"  [color=blue];
+"TEST - AnsibleLike test start" -> "SALT - Configure test on penny"  [color=blue];
+"TEST - AnsibleLike test end";
+"SALT - Configure test on roxanne" -> "TEST - AnsibleLike test end"  [color=blue];
+"SALT - Configure test on penny" -> "TEST - AnsibleLike test end"  [color=blue];
+"SALT - Configure test.objects on roxanne";
+"SALT - Configure test.objects on penny";
+"TEST - AnsibleLike test.objects start";
+"TEST - AnsibleLike test end" -> "TEST - AnsibleLike test.objects start"  [color=blue];
+"TEST - AnsibleLike test.objects start" -> "SALT - Configure test.objects on roxanne"  [color=blue];
+"TEST - AnsibleLike test.objects start" -> "SALT - Configure test.objects on penny"  [color=blue];
+"TEST - AnsibleLike test.objects start" -> "SALT - Configure test.objects on roxanne"  [color=blue];
+"TEST - AnsibleLike test.objects end";
+"SALT - Configure test.objects on roxanne" -> "TEST - AnsibleLike test.objects end"  [color=blue];
+"SALT - Configure test.objects on penny" -> "TEST - AnsibleLike test.objects end"  [color=blue];
+}

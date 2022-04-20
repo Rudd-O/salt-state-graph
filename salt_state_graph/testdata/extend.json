@@ -1,0 +1,227 @@
+{
+    "controller_master": {
+        "__extend__": [
+            {
+                "AnsibleLike test.objects start": {
+                    "__sls__": "orch.test.parallelism",
+                    "__env__": "base",
+                    "test": [
+                        {
+                            "require": [
+                                {
+                                    "test": "AnsibleLike test end"
+                                }
+                            ],
+                            "require_in": [
+                                {
+                                    "salt": "Configure test.objects on roxanne"
+                                }
+                            ]
+                        },
+                        "nop"
+                    ]
+                }
+            }
+        ],
+        "Configure test on roxanne": {
+            "salt": [
+                {
+                    "parallel": true
+                },
+                {
+                    "pillar": {
+                        "skip_package_installs": ""
+                    }
+                },
+                {
+                    "sls": "test"
+                },
+                {
+                    "ssh": true
+                },
+                {
+                    "tgt": "roxanne"
+                },
+                {
+                    "tgt_type": "list"
+                },
+                "state",
+                {
+                    "order": 10000
+                }
+            ],
+            "__sls__": "orch.test.para1",
+            "__env__": "base"
+        },
+        "Configure test on penny": {
+            "salt": [
+                {
+                    "parallel": true
+                },
+                {
+                    "pillar": {
+                        "skip_package_installs": ""
+                    }
+                },
+                {
+                    "sls": "test"
+                },
+                {
+                    "ssh": true
+                },
+                {
+                    "tgt": "penny"
+                },
+                {
+                    "tgt_type": "list"
+                },
+                "state",
+                {
+                    "order": 10001
+                }
+            ],
+            "__sls__": "orch.test.para1",
+            "__env__": "base"
+        },
+        "AnsibleLike test start": {
+            "test": [
+                {
+                    "require_in": [
+                        {
+                            "salt": "Configure test on roxanne"
+                        },
+                        {
+                            "salt": "Configure test on penny"
+                        }
+                    ]
+                },
+                "nop",
+                {
+                    "order": 10002
+                }
+            ],
+            "__sls__": "orch.test.para1",
+            "__env__": "base"
+        },
+        "AnsibleLike test end": {
+            "test": [
+                {
+                    "require": [
+                        {
+                            "salt": "Configure test on roxanne"
+                        },
+                        {
+                            "salt": "Configure test on penny"
+                        }
+                    ]
+                },
+                "nop",
+                {
+                    "order": 10003
+                }
+            ],
+            "__sls__": "orch.test.para1",
+            "__env__": "base"
+        },
+        "Configure test.objects on roxanne": {
+            "salt": [
+                {
+                    "parallel": true
+                },
+                {
+                    "pillar": {
+                        "skip_package_installs": ""
+                    }
+                },
+                {
+                    "sls": "test.objects"
+                },
+                {
+                    "ssh": true
+                },
+                {
+                    "tgt": "roxanne"
+                },
+                {
+                    "tgt_type": "list"
+                },
+                "state",
+                {
+                    "order": 10004
+                }
+            ],
+            "__sls__": "orch.test.para2",
+            "__env__": "base"
+        },
+        "Configure test.objects on penny": {
+            "salt": [
+                {
+                    "parallel": true
+                },
+                {
+                    "pillar": {
+                        "skip_package_installs": ""
+                    }
+                },
+                {
+                    "sls": "test.objects"
+                },
+                {
+                    "ssh": true
+                },
+                {
+                    "tgt": "penny"
+                },
+                {
+                    "tgt_type": "list"
+                },
+                "state",
+                {
+                    "order": 10005
+                }
+            ],
+            "__sls__": "orch.test.para2",
+            "__env__": "base"
+        },
+        "AnsibleLike test.objects start": {
+            "test": [
+                {
+                    "require_in": [
+                        {
+                            "salt": "Configure test.objects on roxanne"
+                        },
+                        {
+                            "salt": "Configure test.objects on penny"
+                        }
+                    ]
+                },
+                "nop",
+                {
+                    "order": 10006
+                }
+            ],
+            "__sls__": "orch.test.para2",
+            "__env__": "base"
+        },
+        "AnsibleLike test.objects end": {
+            "test": [
+                {
+                    "require": [
+                        {
+                            "salt": "Configure test.objects on roxanne"
+                        },
+                        {
+                            "salt": "Configure test.objects on penny"
+                        }
+                    ]
+                },
+                "nop",
+                {
+                    "order": 10007
+                }
+            ],
+            "__sls__": "orch.test.para2",
+            "__env__": "base"
+        }
+    }
+}
