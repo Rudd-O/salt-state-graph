@@ -11,8 +11,11 @@ import time
 def main():
     args = sys.argv[1:]
     display = False
+    while "--pdf" in args:
+        display = "pdf"
+        args.remove("--pdf")
     while "--display" in args:
-        display = True
+        display = "display"
         args.remove("--display")
 
     if args:
@@ -25,7 +28,7 @@ def main():
 
     if display and args[1:]:
         print(
-            "usage error: --display and an output file name are incompatible",
+            "usage error: --display / --pdf and an output file name are incompatible",
             file=sys.stderr,
         )
         sys.exit(os.EX_USAGE)
@@ -43,12 +46,18 @@ def main():
                 o.write(g.render("dot"))
                 o.flush()
                 o.seek(0, 0)
-                with tempfile.NamedTemporaryFile(mode="w+", suffix=".pdf") as p:
-                    subprocess.check_call(["dot", "-Tpdf"], stdin=o, stdout=p)
-                    subprocess.check_call(["xdg-open", p.name])
-                    # Horrible hack to wait until the file is open, because
-                    # xdg-open does not wait until the program is done.
+                if display == "pdf":
+                    with tempfile.NamedTemporaryFile(mode="w+", suffix=".pdf") as p:
+                        subprocess.check_call(["dot", "-Tpdf"], stdin=o, stdout=p)
+                        subprocess.check_call(["xdg-open", p.name])
+                        # Horrible hack to wait until the file is open, because
+                        # xdg-open does not wait until the program is done.
+                        time.sleep(5)
+                elif display == "display":
+                    subprocess.check_call(["xdg-open", o.name])
                     time.sleep(5)
+                else:
+                    assert 0, "not reached"
         else:
             o.write(g.render("dot"))
     finally:
