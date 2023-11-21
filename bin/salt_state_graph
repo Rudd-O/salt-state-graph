@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+import math
 import tempfile
+import textwrap
 import subprocess
 import sys
 import os
@@ -8,15 +10,64 @@ import salt_state_graph
 import time
 
 
+def wrapped(label):
+    maxlines = len(label) / len([x for x in label if x == " "])
+    if maxlines > 3:
+        maxlines = 3
+    linelen = int(math.ceil((len(label) / maxlines)))
+    x = textwrap.wrap(label, linelen, break_long_words=False)
+    return "\\n".join(x)
+
+
+def autowrap(graphviz_text):
+    newtext = []
+    for line in graphviz_text.splitlines(True):
+        newline = ""
+        label = None
+        escapedchar = None
+        for character in line:
+            if character == "\\":
+                if label is not None:
+                    escapedchar = character
+                else:
+                    newline += character
+            if character == '"':
+                if label is not None:
+                    if escapedchar:
+                        label += escapedchar
+                        escapedchar = None
+                        label += character
+                    else:
+                        newline += '"' + wrapped(label) + '"'
+                        label = None
+                else:
+                    label = ""
+            else:
+                if label is not None:
+                    if escapedchar:
+                        label += escapedchar
+                        escapedchar = None
+                    else:
+                        label += character
+                else:
+                    newline += character
+        newtext.append(newline)
+    return "".join(newtext)
+
+
 def main():
     args = sys.argv[1:]
     display = False
+    wrap = False
     while "--pdf" in args:
         display = "pdf"
         args.remove("--pdf")
     while "--display" in args:
         display = "display"
         args.remove("--display")
+    while "--wrap" in args:
+        wrap = True
+        args.remove("--wrap")
 
     if args:
         if args[0] == "-":
@@ -41,9 +92,12 @@ def main():
 
     try:
         g = salt_state_graph.Graph(f)
+        rendered = g.render("dot")
+        if wrap:
+            rendered = autowrap(rendered)
         if display:
             with tempfile.NamedTemporaryFile(mode="w") as o:
-                o.write(g.render("dot"))
+                o.write(rendered)
                 o.flush()
                 o.seek(0, 0)
                 if display == "pdf":
@@ -59,7 +113,7 @@ def main():
                 else:
                     assert 0, "not reached"
         else:
-            o.write(g.render("dot"))
+            o.write(rendered)
     finally:
         f.close()
         if o:
