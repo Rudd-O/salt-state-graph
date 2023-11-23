@@ -1,13 +1,124 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+import math
+import tempfile
+import textwrap
+import subprocess
 import sys
+import os
 import salt_state_graph
+import time
+
+
+def wrapped(label):
+    maxlines = len(label) / len([x for x in label if x == " "])
+    if maxlines > 3:
+        maxlines = 3
+    linelen = int(math.ceil((len(label) / maxlines)))
+    x = textwrap.wrap(label, linelen, break_long_words=False)
+    return "\\n".join(x)
+
+
+def autowrap(graphviz_text):
+    newtext = []
+    for line in graphviz_text.splitlines(True):
+        newline = ""
+        label = None
+        escapedchar = None
+        for character in line:
+            if character == "\\":
+                if label is not None:
+                    escapedchar = character
+                else:
+                    newline += character
+            if character == '"':
+                if label is not None:
+                    if escapedchar:
+                        label += escapedchar
+                        escapedchar = None
+                        label += character
+                    else:
+                        newline += '"' + wrapped(label) + '"'
+                        label = None
+                else:
+                    label = ""
+            else:
+                if label is not None:
+                    if escapedchar:
+                        label += escapedchar
+                        escapedchar = None
+                    else:
+                        label += character
+                else:
+                    newline += character
+        newtext.append(newline)
+    return "".join(newtext)
 
 
 def main():
-    g = salt_state_graph.Graph(sys.stdin)
-    sys.stdout.write(g.render("dot"))
+    args = sys.argv[1:]
+    display = False
+    wrap = False
+    while "--pdf" in args:
+        display = "pdf"
+        args.remove("--pdf")
+    while "--display" in args:
+        display = "display"
+        args.remove("--display")
+    while "--wrap" in args:
+        wrap = True
+        args.remove("--wrap")
+
+    if args:
+        if args[0] == "-":
+            f = sys.stdin
+        else:
+            f = open(args[0], "r")
+    else:
+        f = sys.stdin
+
+    if display and args[1:]:
+        print(
+            "usage error: --display / --pdf and an output file name are incompatible",
+            file=sys.stderr,
+        )
+        sys.exit(os.EX_USAGE)
+    elif args[1:]:
+        o = open(args[1], "w")
+    elif display:
+        o = None
+    else:
+        o = sys.stdout
+
+    try:
+        g = salt_state_graph.Graph(f)
+        rendered = g.render("dot")
+        if wrap:
+            rendered = autowrap(rendered)
+        if display:
+            with tempfile.NamedTemporaryFile(mode="w") as o:
+                o.write(rendered)
+                o.flush()
+                o.seek(0, 0)
+                if display == "pdf":
+                    with tempfile.NamedTemporaryFile(mode="w+", suffix=".pdf") as p:
+                        subprocess.check_call(["dot", "-Tpdf"], stdin=o, stdout=p)
+                        subprocess.check_call(["xdg-open", p.name])
+                        # Horrible hack to wait until the file is open, because
+                        # xdg-open does not wait until the program is done.
+                        time.sleep(5)
+                elif display == "display":
+                    subprocess.check_call(["xdg-open", o.name])
+                    time.sleep(5)
+                else:
+                    assert 0, "not reached"
+        else:
+            o.write(rendered)
+    finally:
+        f.close()
+        if o:
+            o.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
