@@ -6,7 +6,7 @@ import setuptools
 
 VERSION = "0.0.6"
 
-test_requirements = ["pytest==2.7.2", "pytest-cov==2.0.0", "flake8"]
+test_requirements = ["pytest==9.0.3", "pytest-cov==2.0.0", "flake8"]
 
 setup = dict(
     author="Cera Davies",
